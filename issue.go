@@ -550,6 +550,28 @@ func (s *IssueService) AddComment(issueID string, comment *Comment) (*Comment, *
 	return responseComment, resp, nil
 }
 
+// Assign assigns to a user.
+//
+// JIRA API docs: https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-assign
+func (s *IssueService) Assign(issueID string, user string) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("rest/api/2/issue/%s/assignee", issueID)
+
+	type payload struct {
+		Name string `json:"name"`
+	}
+	req, err := s.client.NewRequest("PUT", apiEndpoint, payload{Name:user})
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req,nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, nil
+}
+
 // AddLink adds a link between two issues.
 //
 // JIRA API docs: https://docs.atlassian.com/jira/REST/latest/#api/2/issueLink
@@ -698,7 +720,7 @@ func InitIssueWithMetaAndFields(metaProject *MetaProject, metaIssuetype *MetaIss
 			}
 			switch elemType {
 			case "component":
-				issueFields.Unknowns[jiraKey] = []Component{Component{Name: value}}
+				issueFields.Unknowns[jiraKey] = []Component{{Name: value}}
 			default:
 				issueFields.Unknowns[jiraKey] = []string{value}
 			}
