@@ -572,6 +572,28 @@ func (s *IssueService) Assign(issueID string, user string) (*Response, error) {
 	return resp, nil
 }
 
+// Assign assigns to a user.
+//
+// JIRA API docs: https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-assign
+func (s *IssueService) AssignableUsers(issueID string) (*[]User,*Response, error) {
+	apiEndpoint := fmt.Sprintf("rest/api/2/user/assignable/search?issueKey=%s", issueID)
+	fmt.Println(fmt.Sprintf("rest/api/2/user/assignable/search?issueKey=%s", issueID))
+
+	req, err := s.client.NewRequest("GET", apiEndpoint, nil)
+	if err != nil {
+		return nil,nil, err
+	}
+
+	users := new([]User)
+	resp, err := s.client.Do(req, users)
+	if err != nil {
+		return nil,resp, err
+	}
+
+	return users, resp, nil
+}
+
+
 // AddLink adds a link between two issues.
 //
 // JIRA API docs: https://docs.atlassian.com/jira/REST/latest/#api/2/issueLink
